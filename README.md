@@ -17,6 +17,12 @@ Tango is a LinkedIn logic puzzle where you fill a 6x6 grid with moon (🌙) and 
 - Backtracking algorithm with constraint propagation
 - Visual debugging and solution visualization
 
+### Example Puzzle
+
+![Sample Puzzle](examples/sample5.png)
+
+*Example of a Tango puzzle - Initial board state with fixed pieces and constraints*
+
 ### Visual Debug Output
 
 The system generates comprehensive debugging visualizations when running tests with the `--visual` flag:
