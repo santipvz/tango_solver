@@ -4,7 +4,7 @@ Computer vision system for automatically solving Tango puzzles from images using
 
 ## 🎯 What is Tango?
 
-Tango is a logic puzzle where you fill a 6x6 grid with moon (🌙) and sun (🟠) pieces following constraints:
+Tango is a LinkedIn logic puzzle where you fill a 6x6 grid with moon (🌙) and sun (🟠) pieces following constraints:
 - **Fixed pieces**: Some cells have predetermined pieces
 - **Equality constraints**: Connected cells must have the same piece type
 - **Inequality constraints**: Connected cells must have different piece types
@@ -28,15 +28,19 @@ python3 -m tests.test_runner examples/sample5.png --visual
 This generates the following debug images in `tests/img/`:
 
 ![Grid Detection](tests/img/grid_detection_debug.png)
+
 *Grid detection analysis - Shows detected pieces, constraints, and cell boundaries*
 
 ![Constraint Heatmap](tests/img/constraint_heatmap.png)
+
 *Constraint density heatmap - Visualizes constraint distribution across the grid*
 
 ![Solved Board](tests/img/solved_board.png)
+
 *Solution visualization - The final solved puzzle with constraints overlay*
 
 ![Comprehensive Debug](tests/img/tango_debug_comprehensive.png)
+
 *Complete debug view - Combined analysis with statistics and legend*
 
 ## 🚀 Installation & Usage
