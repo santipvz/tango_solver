@@ -2,9 +2,15 @@ from typing import List, Tuple, Optional, Dict, Any
 import cv2
 import numpy as np
 
-from constraint_classifier import ConstraintClassifier
-from grid_detector import GridDetector
-from piece_detector import PieceDetector
+try:
+    from .constraint_classifier import ConstraintClassifier
+    from .grid_detector import GridDetector
+    from .piece_detector import PieceDetector
+except ImportError:
+    # Fallback for direct execution
+    from constraint_classifier import ConstraintClassifier
+    from grid_detector import GridDetector
+    from piece_detector import PieceDetector
 
 
 class TangoImageParser:

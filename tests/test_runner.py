@@ -8,7 +8,7 @@ import subprocess
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 
-def run_test_file(test_file, image_path=None):
+def run_test_file(test_file, image_path=None, create_gif=False):
     """
     Run a test file and return (success, output).
     """
@@ -19,19 +19,24 @@ def run_test_file(test_file, image_path=None):
                           "solver_integration" in test_file or "visual_debug" in test_file):
             cmd.append(image_path)
 
+        if create_gif and "solver_integration" in test_file:
+            cmd.append("--gif")
+
         result = subprocess.run(cmd, capture_output=True, text=True, cwd=Path(__file__).parent)
         return result.returncode == 0, result.stdout, result.stderr
     except Exception as e:
         return False, "", str(e)
 
 
-def run_all_tests(image_path=None, include_visual=False):
+def run_all_tests(image_path=None, include_visual=False, create_gif=False):
     """
     Run all test suites and generate comprehensive report.
     """
     print("🎯 TANGO SOLVER - TEST")
     print("=" * 70)
     print("Running all test modules")
+    if create_gif:
+        print("🎬 GIF animation will be created for solver tests")
     print()
 
     # Test files to run
@@ -63,7 +68,7 @@ def run_all_tests(image_path=None, include_visual=False):
             results.append((test_name, False, f"File not found: {test_file}"))
             continue
 
-        success, stdout, stderr = run_test_file(str(test_path), image_path)
+        success, stdout, stderr = run_test_file(str(test_path), image_path, create_gif)
 
         if success:
             print(f"✅ {test_name}: PASSED")
@@ -89,7 +94,7 @@ def run_all_tests(image_path=None, include_visual=False):
                 results.append((test_name, False, f"File not found: {test_file}"))
                 continue
 
-            success, stdout, stderr = run_test_file(str(test_path), image_path)
+            success, stdout, stderr = run_test_file(str(test_path), image_path, create_gif)
 
             if success:
                 print(f"✅ {test_name}: PASSED")
@@ -123,10 +128,20 @@ def run_all_tests(image_path=None, include_visual=False):
 
 
 if __name__ == "__main__":
-    # Parse command line arguments
+
+    if "--help" in sys.argv:
+        print("Usage: python3 -m tests.test_runner [image_path] [--visual] [--gif]")
+        print("  --visual: Include visual debugging tests (generates PNG files)")
+        print("  --gif: Create GIF animation for solver tests")
+        sys.exit(0)
+
     include_visual = "--visual" in sys.argv
+    create_gif = "--gif" in sys.argv
+
     if include_visual:
         sys.argv.remove("--visual")
+    if create_gif:
+        sys.argv.remove("--gif")
 
     # Determine image to use
     if len(sys.argv) > 1:
@@ -135,10 +150,11 @@ if __name__ == "__main__":
         image_path = None
         if not image_path:
             print("❌ No image found. Please provide image path as argument.")
-            print("Usage: python3 -m tests.test_runner [image_path] [--visual]")
+            print("Usage: python3 -m tests.test_runner [image_path] [--visual] [--gif]")
             print("  --visual: Include visual debugging tests (generates PNG files)")
+            print("  --gif: Create GIF animation for solver tests")
             sys.exit(1)
 
     # Run all tests
-    success = run_all_tests(image_path, include_visual)
+    success = run_all_tests(image_path, include_visual, create_gif)
     sys.exit(0 if success else 1)

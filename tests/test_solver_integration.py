@@ -413,6 +413,61 @@ def test_visual_solver_progress(image_path, output_path=None):
         return False
 
 
+def test_solver_with_gif(image_path, create_gif=False):
+    """
+    Test: Solve puzzle with optional GIF animation
+    """
+    print(f"🧪 Test: Solver integration with GIF animation")
+    print("-" * 60)
+
+    try:
+        # Parse image
+        parser = TangoImageParser()
+        board_state = parser.parse_image(image_path)
+
+        if not board_state:
+            print("❌ Could not parse image")
+            return False
+
+        # Setup solver
+        solver = TangoSolver()
+
+        # Add fixed pieces
+        for piece in board_state['fixed_pieces']:
+            solver.add_fixed_piece(piece['row'], piece['col'], piece['piece_type'])
+
+        # Add constraints
+        for constraint in board_state['constraints']:
+            solver.add_constraint(constraint['type'], constraint['pos1'], constraint['pos2'])
+
+        print(f"✅ Setup complete:")
+        print(f"   Fixed pieces: {len(board_state['fixed_pieces'])}")
+        print(f"   Constraints: {len(board_state['constraints'])}")
+
+        # Solve with optional GIF
+        if create_gif:
+            print("🎬 Creating GIF animation...")
+            solved = solver.solve(create_gif=True, gif_speed=300, gif_output="test_solving_animation.gif")
+            if solved:
+                print("✅ Puzzle solved with GIF created")
+            else:
+                print("❌ Puzzle not solved, GIF shows attempt")
+        else:
+            solved = solver.solve()
+            if solved:
+                print("✅ Puzzle solved")
+            else:
+                print("❌ Puzzle not solved")
+
+        print(f"📊 Steps taken: {solver.get_steps()}")
+
+        return solved
+
+    except Exception as e:
+        print(f"❌ Error in solver test: {e}")
+        return False
+
+
 def create_comprehensive_visualization(image_path, output_path=None):
     """
     Test: Create a comprehensive, highly readable visualization.
@@ -681,6 +736,11 @@ def create_comprehensive_visualization(image_path, output_path=None):
 if __name__ == "__main__":
     import sys
 
+    # Parse arguments
+    create_gif = "--gif" in sys.argv
+    if create_gif:
+        sys.argv.remove("--gif")
+
     # Determine image to use
     if len(sys.argv) > 1:
         image_path = sys.argv[1]
@@ -688,38 +748,23 @@ if __name__ == "__main__":
         image_path = None
         if not image_path:
             print("❌ No image found. Please provide image path as argument.")
-            print("Usage: python3 -m tests.test_visual_debug [image_path]")
+            print("Usage: python3 -m tests.test_solver_integration [image_path] [--gif]")
+            print("  --gif: Create GIF animation of solving process")
             sys.exit(1)
 
-    print("🎯 VISUAL DEBUGGING TESTS")
+    print("🎯 SOLVER INTEGRATION TESTS")
     print("=" * 60)
     print(f"Processing image: {image_path}")
+    if create_gif:
+        print("🎬 GIF animation enabled")
     print()
 
-    # Run visual tests
-    tests = [
-        lambda: draw_grid_detection_visualization(image_path),
-        lambda: draw_constraint_heatmap(image_path),
-        lambda: test_visual_solver_progress(image_path),
-        lambda: create_comprehensive_visualization(image_path),
-    ]
+    # Run solver test
+    success = test_solver_with_gif(image_path, create_gif)
 
-    passed = 0
-    total = len(tests)
-
-    for test_func in tests:
-        try:
-            if test_func():
-                passed += 1
-        except Exception as e:
-            print(f"❌ Unexpected error: {e}")
-
-    print(f"\n📊 Visual tests completed: {passed}/{total} successful")
-
-    if passed == total:
-        print("✅ All visualizations generated successfully!")
-        print("🎨 Check the generated PNG files for visual debugging")
+    if success:
+        print("\n✅ Solver integration test PASSED")
     else:
-        print("❌ Some visualizations failed")
+        print("\n❌ Solver integration test FAILED")
 
-    sys.exit(0 if passed == total else 1)
+    sys.exit(0 if success else 1)

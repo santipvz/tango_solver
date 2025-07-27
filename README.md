@@ -16,38 +16,7 @@ Tango is a LinkedIn logic puzzle where you fill a 6x6 grid with moon (🌙) and 
 - Constraint detection through visual pattern recognition
 - Backtracking algorithm with constraint propagation
 - Visual debugging and solution visualization
-
-### Example Puzzle
-
-![Sample Puzzle](examples/sample5.png)
-
-*Example of a Tango puzzle - Initial board state with fixed pieces and constraints*
-
-### Visual Debug Output
-
-The system generates comprehensive debugging visualizations when running tests with the `--visual` flag:
-
-```bash
-python3 -m tests.test_runner examples/sample5.png --visual
-```
-
-This generates the following debug images in `tests/img/`:
-
-![Grid Detection](tests/img/grid_detection_debug.png)
-
-*Grid detection analysis - Shows detected pieces, constraints, and cell boundaries*
-
-![Constraint Heatmap](tests/img/constraint_heatmap.png)
-
-*Constraint density heatmap - Visualizes constraint distribution across the grid*
-
-![Solved Board](tests/img/solved_board.png)
-
-*Solution visualization - The final solved puzzle with constraints overlay*
-
-![Comprehensive Debug](tests/img/tango_debug_comprehensive.png)
-
-*Complete debug view - Combined analysis with statistics and legend*
+- GIF animation: Step-by-step visualization of the backtracking algorithm (⚠️ significantly slower execution)
 
 ## 🚀 Installation & Usage
 
@@ -76,68 +45,133 @@ python3 main.py path/to/your/puzzle.png
 
 ```bash
 python3 main.py examples/sample1.png --verbose    # Detailed output
-python3 main.py examples/sample1.png --no-solve   # Extract info only
+python3 main.py examples/sample1.png --gif       # Generate GIF animation (⚠️ much slower)
+python3 main.py examples/sample1.png --quiet     # Minimal output
 ```
+
+### GIF Animation
+
+You can generate an animated GIF showing how the backtracking algorithm explores the solution space:
+
+```bash
+# Generate GIF with default settings (1 ms default speed)
+python3 main.py examples/sample1.png --gif
+
+# Custom GIF speed and output filename
+python3 main.py examples/sample1.png --gif --speed 500 --output my_solution.gif
+```
+
+⚠️ **Warning**: Generating the GIF animation significantly slows down the solving process as it captures and saves each step of the backtracking algorithm.
+
+The GIF visualization shows:
+- Yellow highlights: current position being processed
+- Green dots: equality constraints (=)
+- Red dots: difference constraints (x)
+- Blue cells: piece type 0
+- Orange cells: piece type 1
 
 ### Tests
 
 ```bash
-python3 -m tests.test_runner           # Run all tests
-python3 -m tests.test_runner --visual  # With debug images (saves to tests/img/)
+python -m tests.test_runner           # Run all tests
+python -m tests.test_runner --visual  # With debug images (saves to tests/img/)
 
 # Test with specific image and generate visualizations:
-python3 -m tests.test_runner examples/sample5.png --visual
+python -m tests.test_runner examples/sample5.png --visual
 
 # Test with your own image:
-python3 -m tests.test_runner path/to/your/puzzle.png --visual
+python -m tests.test_runner path/to/your/puzzle.png --visual
+
+# Test with GIF generation:
+python -m tests.test_runner examples/sample1.png --gif
 ```
+
+### Example Puzzle
+
+![Sample Puzzle](examples/sample5.png)
+
+*Example of a Tango puzzle - Initial board state with fixed pieces and constraints*
+
+### Visual Debug Output
+
+The system generates comprehensive debugging visualizations when running tests with the `--visual` flag:
+
+```bash
+python -m tests.test_runner examples/sample5.png --visual
+```
+
+This generates the following debug images in `tests/img/`:
+
+![Grid Detection](tests/img/grid_detection_debug.png)
+
+*Grid detection analysis - Shows detected pieces, constraints, and cell boundaries*
+
+![Constraint Heatmap](tests/img/constraint_heatmap.png)
+
+*Constraint density heatmap - Visualizes constraint distribution across the grid*
+
+![Solved Board](tests/img/solved_board.png)
+
+*Solution visualization - The final solved puzzle with constraints overlay*
+
+![Comprehensive Debug](tests/img/comprehensive_visualization.png)
+
+*Complete debug view - Combined analysis with statistics and legend*
 
 ## 🛠️ Architecture
 
 - **`main.py`**: Command-line interface
 - **`src/image_parser.py`**: Image processing and feature extraction
-- **`src/tango_solver.py`**: Constraint satisfaction solver
+- **`src/tango_solver.py`**: Constraint satisfaction solver with optional GIF generation
+- **`src/visualizer.py`**: Board visualization and GIF animation creation
 - **`tests/`**: Comprehensive test suite with visual debugging
+
 ```mermaid
 classDiagram
 direction TB
-    class Main {
-	    +main()
+    class TangoCLI {
+        +main()
     }
     class TangoImageParser {
-	    -grid_detector: GridDetector
-	    -piece_detector: PieceDetector
-	    -constraint_classifier: ConstraintClassifier
-	    +parse_image(image_path: str) Dict
+        -grid_detector: GridDetector
+        -piece_detector: PieceDetector
+        -constraint_classifier: ConstraintClassifier
+        +parse_image(image_path: str) Dict
     }
     class TangoSolver {
-	    -board: List~List~int~~
-	    -constraints: List
-	    -fixed_pieces: List
-	    +add_constraint()
-	    +add_fixed_piece()
-	    +solve() bool
-	    +print_board()
+        -board: List~List~int~~
+        -constraints: List
+        -fixed_pieces: List
+        +add_constraint()
+        +add_fixed_piece()
+        +solve(create_gif: bool) bool
+        +print_board()
+    }
+    class BoardVisualizer {
+        +create_board_image()
+        +save_frame()
+        +create_gif()
     }
     class GridDetector {
-	    +detect_grid(img) List
+        +detect_grid(img) List
     }
     class PieceDetector {
-	    +detect_piece(cell_img) Dict
+        +detect_piece(cell_img) Dict
     }
     class ConstraintClassifier {
-	    +classify_constraint(image) str
+        +classify_constraint(image) str
     }
-	note for TangoImageParser "Processes Tango puzzle images<br/>Extracts pieces and constraints"
-	note for TangoSolver "Solves using backtracking<br/>Validates game rules"
-    Main --> TangoImageParser : uses
-    Main --> TangoSolver : uses
+    note for TangoImageParser "Processes Tango puzzle images<br/>Extracts pieces and constraints"
+    note for TangoSolver "Solves using backtracking<br/>Validates game rules<br/>Optional GIF generation"
+    note for BoardVisualizer "Creates visual representations<br/>Generates GIF animations"
+    TangoCLI --> TangoImageParser : uses
+    TangoCLI --> TangoSolver : uses
+    TangoSolver --> BoardVisualizer : uses
     TangoImageParser --> GridDetector : contains
     TangoImageParser --> PieceDetector : contains
     TangoImageParser --> ConstraintClassifier : contains
     TangoImageParser ..> TangoSolver : provides data
 ```
-
 ## 📋 Requirements
 
 - Python 3.8+

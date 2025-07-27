@@ -9,12 +9,24 @@ Game rules:
 5. "x" clues indicate adjacent cells must have different types
 """
 
+try:
+    from .visualizer import BoardVisualizer
+except ImportError:
+    from visualizer import BoardVisualizer
+
+
 class TangoSolver:
     def __init__(self):
         self.size = 6
         self.board = [[None for _ in range(self.size)] for _ in range(self.size)]
         self.constraints = []
         self.fixed_pieces = []
+        self.steps = 0
+
+        # Visualization settings
+        self._visualizer = None
+        self._create_gif = False
+        self._gif_speed = 400
 
     def add_constraint(self, constraint_type, pos1, pos2):
         self.constraints.append((constraint_type, pos1, pos2))
@@ -23,8 +35,16 @@ class TangoSolver:
         self.board[row][col] = piece_type
         self.fixed_pieces.append((row, col, piece_type))
 
+        if self._create_gif and self._visualizer:
+            self._visualizer.save_frame(
+                self.board,
+                self.constraints,
+                (row, col),
+                f"Fixed piece: {piece_type} at ({row}, {col})"
+            )
+
     def is_valid_placement(self, row, col, piece_type):
-        temp_board = [row[:] for row in self.board]
+        temp_board = [r[:] for r in self.board]
         temp_board[row][col] = piece_type
 
         if not self._check_row_column_constraints(temp_board, row, col):
@@ -97,25 +117,97 @@ class TangoSolver:
 
         return True
 
-    def solve(self):
-        return self._backtrack()
+    def solve(self, create_gif=False, gif_speed=400, gif_output="solving_animation.gif"):
+        """
+        Solve the Tango puzzle using backtracking
+
+        Args:
+            create_gif (bool): Whether to create GIF animation
+            gif_speed (int): Animation speed in milliseconds
+            gif_output (str): Output GIF filename
+
+        Returns:
+            bool: True if puzzle was solved, False otherwise
+        """
+        if create_gif:
+            self._enable_gif_creation(gif_speed)
+
+        result = self._backtrack()
+
+        if create_gif and self._visualizer:
+            self._finalize_gif(result, gif_output)
+
+        return result
+
+    def _enable_gif_creation(self, gif_speed=400):
+        """Enable GIF creation"""
+        self._create_gif = True
+        self._gif_speed = gif_speed
+        self._visualizer = BoardVisualizer()
+        self._visualizer.save_frame(
+            self.board,
+            self.constraints,
+            None,
+            f"Step {self.steps}: Initial board"
+        )
+
+    def _finalize_gif(self, solved, output_path):
+        """Create final GIF"""
+        status = "SOLVED" if solved else "NO SOLUTION"
+        self._visualizer.save_frame(
+            self.board,
+            self.constraints,
+            None,
+            f"Step {self.steps}: {status}"
+        )
+
+        gif_path = self._visualizer.create_gif(
+            output_path=output_path,
+            duration=self._gif_speed,
+            cleanup_frames=True
+        )
+
+        return gif_path
 
     def _backtrack(self):
         for row in range(self.size):
             for col in range(self.size):
                 if self.board[row][col] is None:
-                    # Try both piece types
                     for piece_type in [0, 1]:
+                        self.steps += 1
+
+                        if self._create_gif and self._visualizer:
+                            self._visualizer.save_frame(
+                                self.board,
+                                self.constraints,
+                                (row, col),
+                                f"Step {self.steps}: Trying {piece_type} at ({row}, {col})"
+                            )
+
                         if self.is_valid_placement(row, col, piece_type):
                             self.board[row][col] = piece_type
+
+                            if self._create_gif and self._visualizer:
+                                self._visualizer.save_frame(
+                                    self.board,
+                                    self.constraints,
+                                    (row, col),
+                                    f"Step {self.steps}: Placed {piece_type} at ({row}, {col})"
+                                )
 
                             if self._backtrack():
                                 return True
 
                             self.board[row][col] = None
 
+                            if self._create_gif and self._visualizer:
+                                self._visualizer.save_frame(
+                                    self.board,
+                                    self.constraints,
+                                    (row, col),
+                                    f"Step {self.steps}: Backtracking from ({row}, {col})"
+                                )
                     return False
-
         return self.is_complete()
 
     def print_board_with_constraints(self):
@@ -160,15 +252,5 @@ class TangoSolver:
             print(' '.join(str(cell) if cell is not None else '.' for cell in row))
         print()
 
-
-if __name__ == "__main__":
-    solver = TangoSolver()
-
-    print("Initial board:")
-    solver.print_board()
-
-    if solver.solve():
-        print("Puzzle solved!")
-        solver.print_board()
-    else:
-        print("Could not solve the puzzle")
+    def get_steps(self):
+        return self.steps

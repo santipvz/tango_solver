@@ -606,7 +606,7 @@ def create_comprehensive_visualization(image_path, output_path=None):
         # Moon example - larger circle and text
         cv2.circle(expanded_img, (legend_x + 20, y_offset + 8), 18, (255, 165, 0), -1)
         cv2.circle(expanded_img, (legend_x + 20, y_offset + 8), 18, (0, 0, 0), 3)
-        cv2.putText(expanded_img, "M", (legend_x + 12, y_offset + 16),
+        cv2.putText(expanded_img, "M", (legend_x + 11, y_offset + 16),
 
                    cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 0), 3)
         cv2.putText(expanded_img, "Moon pieces (type 0)", (legend_x + 50, y_offset + 15),
@@ -617,7 +617,7 @@ def create_comprehensive_visualization(image_path, output_path=None):
         # Sun example - larger circle and text
         cv2.circle(expanded_img, (legend_x + 20, y_offset + 8), 18, (0, 255, 255), -1)
         cv2.circle(expanded_img, (legend_x + 20, y_offset + 8), 18, (0, 0, 0), 3)
-        cv2.putText(expanded_img, "S", (legend_x + 14, y_offset + 16),
+        cv2.putText(expanded_img, "S", (legend_x + 12, y_offset + 16),
                    cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 0), 3)
         cv2.putText(expanded_img, "Sun pieces (type 1)", (legend_x + 50, y_offset + 15),
                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 0), 2)
@@ -666,7 +666,7 @@ def create_comprehensive_visualization(image_path, output_path=None):
         # Save comprehensive visualization with fixed name
         if output_path is None:
             # Save in project root directory
-            output_path = str(Path(__file__).parent.parent / "tests/img/tango_debug_comprehensive.png")
+            output_path = str(Path(__file__).parent.parent / "tests/img/comprehensive_visualization.png")
 
         cv2.imwrite(output_path, expanded_img)
         print(f"✅ Comprehensive visualization saved to: {output_path}")
