@@ -98,6 +98,45 @@ python3 -m tests.test_runner path/to/your/puzzle.png --visual
 - **`src/image_parser.py`**: Image processing and feature extraction
 - **`src/tango_solver.py`**: Constraint satisfaction solver
 - **`tests/`**: Comprehensive test suite with visual debugging
+```mermaid
+classDiagram
+direction TB
+    class Main {
+	    +main()
+    }
+    class TangoImageParser {
+	    -grid_detector: GridDetector
+	    -piece_detector: PieceDetector
+	    -constraint_classifier: ConstraintClassifier
+	    +parse_image(image_path: str) Dict
+    }
+    class TangoSolver {
+	    -board: List~List~int~~
+	    -constraints: List
+	    -fixed_pieces: List
+	    +add_constraint()
+	    +add_fixed_piece()
+	    +solve() bool
+	    +print_board()
+    }
+    class GridDetector {
+	    +detect_grid(img) List
+    }
+    class PieceDetector {
+	    +detect_piece(cell_img) Dict
+    }
+    class ConstraintClassifier {
+	    +classify_constraint(image) str
+    }
+	note for TangoImageParser "Processes Tango puzzle images<br/>Extracts pieces and constraints"
+	note for TangoSolver "Solves using backtracking<br/>Validates game rules"
+    Main --> TangoImageParser : uses
+    Main --> TangoSolver : uses
+    TangoImageParser --> GridDetector : contains
+    TangoImageParser --> PieceDetector : contains
+    TangoImageParser --> ConstraintClassifier : contains
+    TangoImageParser ..> TangoSolver : provides data
+```
 
 ## 📋 Requirements
 

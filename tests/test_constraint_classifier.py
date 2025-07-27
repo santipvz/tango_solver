@@ -38,7 +38,7 @@ def test_constraint_classifier_robustness():
         horizontal_img[12:15, 10:50] = [140, 114, 76]  # Horizontal line
         horizontal_img[18:21, 10:50] = [140, 114, 76]  # Another line
         result = classifier.classify_constraint(horizontal_img)
-        print(f"✅ Horizontal symbol: {result} (expected: equals)")
+        assert result == 'equals'
 
         # Test with diagonal symbol (should be 'x')
         diagonal_img = np.ones((40, 40, 3), dtype=np.uint8) * 255
@@ -48,7 +48,7 @@ def test_constraint_classifier_robustness():
             if 10+i < 40 and 30-i >= 0:
                 diagonal_img[10+i, 30-i] = [140, 114, 76]  # Diagonal /
         result = classifier.classify_constraint(diagonal_img)
-        print(f"✅ Diagonal symbol: {result} (expected: not_equals)")
+        assert result == 'not_equals'
 
         print("✅ Classifier handles edge cases correctly")
         return True

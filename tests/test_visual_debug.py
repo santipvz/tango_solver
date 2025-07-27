@@ -1,8 +1,3 @@
-#!/usr/bin/env python3
-"""
-Visual debugging tests for grid detection and constraint visualization.
-"""
-
 import sys
 import os
 from pathlib import Path
@@ -151,10 +146,10 @@ def draw_grid_detection_visualization(image_path, output_path=None):
             cv2.circle(vis_img, (mid_x, mid_y), 20, (0, 0, 0), 3)
 
             if constraint_type == "=":
-                # Ajusta el centro para "="
+                # Adjust the center for "="
                 offset_x, offset_y = -15, 11
             elif constraint_type == "x":
-                # Ajusta el centro para "x"
+                # Adjust the center for "x"
                 offset_x, offset_y = -10, 9
             else:
                 offset_x, offset_y = -10, 10
@@ -382,10 +377,10 @@ def test_visual_solver_progress(image_path, output_path=None):
             cv2.circle(vis_img, (mid_x, mid_y), 20, (0, 0, 0), 3)
 
             if constraint_type == "=":
-                # Ajusta el centro para "="
+                # Adjust the center for "="
                 offset_x, offset_y = -15, 11
             elif constraint_type == "x":
-                # Ajusta el centro para "x"
+                # Adjust the center for "x"
                 offset_x, offset_y = -10, 9
             else:
                 offset_x, offset_y = -10, 10
@@ -559,10 +554,10 @@ def create_comprehensive_visualization(image_path, output_path=None):
             cv2.circle(vis_img, (mid_x, mid_y), 20, (0, 0, 0), 3)
 
             if constraint_type == "=":
-                # Ajusta el centro para "="
+                # Adjust the center for "="
                 offset_x, offset_y = -15, 11
             elif constraint_type == "x":
-                # Ajusta el centro para "x"
+                # Adjust the center for "x"
                 offset_x, offset_y = -10, 9
             else:
                 offset_x, offset_y = -10, 10

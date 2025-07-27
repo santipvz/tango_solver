@@ -1,8 +1,3 @@
-#!/usr/bin/env python3
-"""
-Tests for image parsing functionality.
-"""
-
 import sys
 import os
 from pathlib import Path

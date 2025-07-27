@@ -1,8 +1,3 @@
-#!/usr/bin/env python3
-"""
-Main test runner that executes all test suites.
-"""
-
 import sys
 import os
 from pathlib import Path

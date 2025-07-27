@@ -1,8 +1,3 @@
-#!/usr/bin/env python3
-"""
-Tests for piece detection functionality.
-"""
-
 import sys
 import os
 from pathlib import Path

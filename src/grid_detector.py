@@ -6,8 +6,8 @@ class GridDetector:
     """
     Grid detector for Tango board.
 
-    Divides the board image into a 6x6 grid and returns
-    the coordinates of each cell.
+    Divides the board image into a grid of size `grid_size` x `grid_size` and
+    returns the coordinates of each cell.
     """
 
     def __init__(self, grid_size: int = 6):
@@ -16,7 +16,6 @@ class GridDetector:
     def detect_grid(self, img: np.ndarray) -> List[List[Tuple[int, int, int, int]]]:
         height, width = img.shape[:2]
 
-        # Simple estimation: divide image into 6x6
         cell_width = width // self.grid_size
         cell_height = height // self.grid_size
 
