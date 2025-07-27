@@ -1,12 +1,12 @@
+from typing import Dict, Any
 import cv2
 import numpy as np
-from typing import Dict, Any
 
 
 class PieceDetector:
     def __init__(self):
         pass
-    
+
     def detect_piece(self, cell_img: np.ndarray) -> Dict[str, Any]:
 
         hsv = cv2.cvtColor(cell_img, cv2.COLOR_RGB2HSV)
@@ -15,7 +15,7 @@ class PieceDetector:
 
         blue_score = self._detect_blue_by_rgb(avg_color)
         orange_score = self._detect_orange_by_rgb(avg_color)
-        
+
         # Color ranges for HSV detection
         blue_ranges = [
             ([100, 50, 50], [130, 255, 255]),    # Standard blue
@@ -23,7 +23,7 @@ class PieceDetector:
             ([210, 180, 120], [240, 255, 200]),  # Specific range for moon outline
             ([195, 100, 100], [245, 255, 255]),  # Wide range for moon variations
         ]
-        
+
         orange_ranges = [
             ([10, 100, 100], [25, 255, 255]),    # Standard orange
             ([254, 169, 27], [254, 169, 27]),    # Specific range for circle interior
@@ -53,7 +53,7 @@ class PieceDetector:
             return {'type': 'piece', 'piece_type': 1}  # Circle
 
         return {'type': 'empty'}
-    
+
     def _detect_blue_by_rgb(self, avg_color: np.ndarray) -> float:
         r, g, b = avg_color
 
@@ -61,7 +61,7 @@ class PieceDetector:
             blue_score = (2 * b) - (r + g)
             return max(0, blue_score)
         return 0
-    
+
     def _detect_orange_by_rgb(self, avg_color: np.ndarray) -> float:
         r, g, b = avg_color
 
@@ -69,9 +69,9 @@ class PieceDetector:
             orange_score = (r + g) - (2 * b)
             return max(0, orange_score)
         return 0
-    
+
     def get_piece_name(self, piece_type: int) -> str:
         return "MOON" if piece_type == 0 else "CIRCLE"
-    
+
     def get_piece_emoji(self, piece_type: int) -> str:
         return "🌙" if piece_type == 0 else "🟠"
