@@ -58,26 +58,26 @@ pip install -r requirements.txt
 
 3. **Solve a puzzle:**
 ```bash
-python main.py examples/sample1.png
+python3 main.py examples/sample1.png
 ```
 
 **Use your own puzzle image:**
 ```bash
-python main.py path/to/your/puzzle.png
+python3 main.py path/to/your/puzzle.png
 ```
 
 ### Options
 
 ```bash
-python main.py examples/sample1.png --verbose    # Detailed output
-python main.py examples/sample1.png --no-solve   # Extract info only
+python3 main.py examples/sample1.png --verbose    # Detailed output
+python3 main.py examples/sample1.png --no-solve   # Extract info only
 ```
 
 ### Tests
 
 ```bash
-python -m tests.test_runner           # Run all tests
-python -m tests.test_runner --visual  # With debug images (saves to tests/img/)
+python3 -m tests.test_runner           # Run all tests
+python3 -m tests.test_runner --visual  # With debug images (saves to tests/img/)
 
 # Test with specific image and generate visualizations:
 python3 -m tests.test_runner examples/sample5.png --visual
