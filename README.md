@@ -118,6 +118,11 @@ This generates the following debug images in `tests/img/`:
 
 *Complete debug view - Combined analysis with statistics and legend*
 
+![Solution Animation](tests/img/sample5_solution.gif)
+
+*Animated representation of the backtracking algorithm in action*
+
+
 ## 🛠️ Architecture
 
 - **`main.py`**: Command-line interface
