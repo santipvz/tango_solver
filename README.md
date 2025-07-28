@@ -53,7 +53,8 @@ python3 main.py examples/sample1.png --quiet     # Minimal output
 ```bash
 python3 main.py examples/sample5.png --verbose
 ```
-<video controls src="assets/test.mp4" title="Title"></video>
+![TEST](assets/test.gif)
+
 ### GIF Animation
 
 You can generate an animated GIF showing how the backtracking algorithm explores the solution space:
