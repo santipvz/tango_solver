@@ -7,6 +7,10 @@ import time
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
+img_dir = Path(__file__).parent / "img"
+if not img_dir.exists():
+    img_dir.mkdir(parents=True, exist_ok=True)
+
 from image_parser import TangoImageParser
 from tango_solver import TangoSolver
 

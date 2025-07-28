@@ -7,6 +7,9 @@ import subprocess
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
+img_dir = Path(__file__).parent / "img"
+if not img_dir.exists():
+    img_dir.mkdir(parents=True, exist_ok=True)
 
 def run_test_file(test_file, image_path=None, create_gif=False):
     """

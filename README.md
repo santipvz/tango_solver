@@ -49,6 +49,11 @@ python3 main.py examples/sample1.png --gif       # Generate GIF animation (âš ï¸
 python3 main.py examples/sample1.png --quiet     # Minimal output
 ```
 
+**Example:**
+```bash
+python3 main.py examples/sample5.png --verbose
+```
+<video controls src="assets/test.mp4" title="Title"></video>
 ### GIF Animation
 
 You can generate an animated GIF showing how the backtracking algorithm explores the solution space:
@@ -102,23 +107,23 @@ python -m tests.test_runner examples/sample5.png --visual
 
 This generates the following debug images in `tests/img/`:
 
-![Grid Detection](tests/img/grid_detection_debug.png)
+![Grid Detection](assets/grid_detection_debug.png)
 
 *Grid detection analysis - Shows detected pieces, constraints, and cell boundaries*
 
-![Constraint Heatmap](tests/img/constraint_heatmap.png)
+![Constraint Heatmap](assets/constraint_heatmap.png)
 
 *Constraint density heatmap - Visualizes constraint distribution across the grid*
 
-![Solved Board](tests/img/solved_board.png)
+![Solved Board](assets/solved_board.png)
 
 *Solution visualization - The final solved puzzle with constraints overlay*
 
-![Comprehensive Debug](tests/img/comprehensive_visualization.png)
+![Comprehensive Debug](assets/comprehensive_visualization.png)
 
 *Complete debug view - Combined analysis with statistics and legend*
 
-![Solution Animation](tests/img/sample5_solution.gif)
+![Solution Animation](assets/sample5_solution.gif)
 
 *Animated representation of the backtracking algorithm in action*
 
