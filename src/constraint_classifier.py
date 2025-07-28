@@ -79,10 +79,19 @@ class ConstraintClassifier:
             equal_pattern_score += 3
 
         # Criterion 2: Connectivity
+        diagonal_ratio = diagonal_connectivity / max(horizontal_connectivity, 1)
+        horizontal_ratio = horizontal_connectivity / max(diagonal_connectivity, 1)
+
         if diagonal_connectivity > horizontal_connectivity:
             cross_pattern_score += 2
+            # Bonus for strong diagonal dominance
+            if diagonal_ratio >= 1.5:
+                cross_pattern_score += 2
         elif horizontal_connectivity > diagonal_connectivity:
             equal_pattern_score += 2
+            # Bonus for strong horizontal dominance
+            if horizontal_ratio >= 1.5:
+                equal_pattern_score += 2
 
         # Criterion 3: Bounding box aspect
         if bbox_aspect > 1.5:
