@@ -143,7 +143,7 @@ The following shows the same board captured in two different ways:
 ```
 🎯 TANGO SOLVER
 ========================================
-🖼️  Parsing puzzle from: examples/right.png
+🖼️  Parsing puzzle from: assets/right.png
 ✅ Found 10 fixed pieces
 ✅ Found 4 constraints
 🔒 Fixed pieces:
@@ -180,7 +180,7 @@ The following shows the same board captured in two different ways:
 ```
 🎯 TANGO SOLVER
 ========================================
-🖼️  Parsing puzzle from: examples/wrong.png
+🖼️  Parsing puzzle from: assets/wrong.png
 ✅ Found 11 fixed pieces
 ✅ Found 1 constraints
 🔒 Fixed pieces:
