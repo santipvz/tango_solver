@@ -129,6 +129,91 @@ This generates the following debug images in `tests/img/`:
 *Animated representation of the backtracking algorithm in action*
 
 
+## ⚠️ Important: Image Quality Requirements
+
+**It is crucial that the puzzle image is cropped as tightly as possible to the board area.** The presence of irrelevant information around the board can cause errors in constraint and fixed piece detection.
+
+### Comparative Example
+
+The following shows the same board captured in two different ways:
+
+#### ✅ Correct Image (Cropped to board)
+![Right Image](assets/right.png)
+
+```
+🎯 TANGO SOLVER
+========================================
+🖼️  Parsing puzzle from: examples/right.png
+✅ Found 10 fixed pieces
+✅ Found 4 constraints
+🔒 Fixed pieces:
+   (0, 2): 1
+   (0, 3): 0
+   (2, 0): 1
+   (2, 3): 1
+   (2, 5): 1
+   (3, 0): 1
+   (3, 2): 0
+   (3, 5): 0
+   (5, 2): 0
+   (5, 3): 1
+🔗 Constraints:
+   (1, 4) x (1, 5)
+   (4, 0) x (4, 1)
+   (0, 1) = (1, 1)
+   (4, 4) = (5, 4)
+✅ Puzzle solved!
+📊 Steps: 212
+
+🎉 Final solved board:
+🌙 🟠 🟠 🌙 🟠 🌙
+🌙 🟠 🟠 🌙 🟠 🌙
+🟠 🌙 🌙 🟠 🌙 🟠
+🟠 🌙 🌙 🟠 🟠 🌙
+🌙 🟠 🟠 🌙 🌙 🟠
+🟠 🌙 🌙 🟠 🌙 🟠
+```
+
+#### ❌ Incorrect Image (With irrelevant information)
+![Wrong Image](assets/wrong.png)
+
+```
+🎯 TANGO SOLVER
+========================================
+🖼️  Parsing puzzle from: examples/wrong.png
+✅ Found 11 fixed pieces
+✅ Found 1 constraints
+🔒 Fixed pieces:
+   (0, 2): 1
+   (2, 0): 1
+   (2, 1): 1
+   (2, 3): 1
+   (2, 4): 1
+   (2, 5): 1
+   (3, 0): 1
+   (3, 1): 1
+   (3, 2): 0
+   (5, 2): 0
+   (5, 3): 1
+🔗 Constraints:
+   (4, 4) = (5, 4)
+❌ No solution found
+Final board state:
+⬜ ⬜ 🟠 ⬜ ⬜ ⬜
+⬜ ⬜ ⬜ ⬜ ⬜ ⬜
+🟠 🟠 ⬜ 🟠 🟠 🟠
+🟠 🟠 🌙 ⬜ ⬜ ⬜
+⬜ ⬜ ⬜ ⬜ ⬜ ⬜
+⬜ ⬜ 🌙 🟠 ⬜ ⬜
+```
+
+As can be observed:
+- **Correct image**: Detected 10 fixed pieces and 4 constraints.
+- **Incorrect image**: Detected 11 fixed pieces and only 1 constraint → **❌ No solution found**
+
+The difference in constraint detection (4 vs 1) is critical and causes the same board to be unsolvable when the image contains irrelevant information.
+
+
 ## 🛠️ Architecture
 
 - **`main.py`**: Command-line interface
