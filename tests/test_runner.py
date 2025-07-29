@@ -25,7 +25,8 @@ def run_test_file(test_file, image_path=None, create_gif=False):
         if create_gif and "solver_integration" in test_file:
             cmd.append("--gif")
 
-        result = subprocess.run(cmd, capture_output=True, text=True, cwd=Path(__file__).parent)
+        project_root = Path(__file__).parent.parent
+        result = subprocess.run(cmd, capture_output=True, text=True, cwd=project_root)
         return result.returncode == 0, result.stdout, result.stderr
     except Exception as e:
         return False, "", str(e)
@@ -55,6 +56,7 @@ def run_all_tests(image_path=None, include_visual=False, create_gif=False):
     # Visual debug tests
     visual_tests = [
         ("Visual Debug", "test_visual_debug.py"),
+        ("Constraint Debug", "test_constraint_debug.py"),
     ]
 
     results = []
@@ -108,6 +110,43 @@ def run_all_tests(image_path=None, include_visual=False, create_gif=False):
 
             results.append((test_name, success, stderr if stderr else ""))
             print()
+
+        # Run constraint debug specifically with visual output
+        print("🔍 Running constraint detection debug with visual output...")
+        try:
+            # Import and run the constraint debug function directly
+            sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+            sys.path.insert(0, str(Path(__file__).parent))
+            from test_constraint_debug import debug_constraint_detection
+
+            # Save to tests/img/ directory
+            img_dir = Path(__file__).parent / "img"
+            img_dir.mkdir(exist_ok=True)
+
+            # Convert relative path to absolute path from the main directory
+            if not Path(image_path).is_absolute():
+                image_path = str(Path(__file__).parent.parent / image_path)
+
+            # Change to the output directory temporarily
+            original_dir = os.getcwd()
+            os.chdir(str(img_dir))
+
+            try:
+                debug_constraint_detection(image_path, save_debug=True)
+
+                # Check if the image was actually saved
+                expected_filename = f"constraint_debug_{Path(image_path).stem}.png"
+                saved_path = img_dir / expected_filename
+                if saved_path.exists():
+                    print(f"✅ Constraint debug visualization saved to: {saved_path}")
+                else:
+                    print(f"✅ Constraint debug completed (check {img_dir} for output)")
+            finally:
+                os.chdir(original_dir)
+
+        except Exception as e:
+            print(f"❌ Failed to run constraint debug: {e}")
+            results.append(("Constraint Debug Visual", False, str(e)))
     elif image_path:
         print("🎨 Visual debugging tests available!")
         print("   These generate PNG visualizations of grid detection and constraints.")

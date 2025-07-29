@@ -1,6 +1,7 @@
 import os
 import shutil
 from PIL import Image, ImageDraw, ImageFont
+from pathlib import Path
 
 
 class BoardVisualizer:
@@ -26,6 +27,27 @@ class BoardVisualizer:
         self.step_counter = 0
         self.frames_dir = "solver_frames"
         self._setup_frames_dir()
+
+        # Load piece templates
+        self._load_piece_templates()
+
+    def _load_piece_templates(self):
+        """Load moon and sun templates from templates directory."""
+        templates_dir = Path(__file__).parent.parent / "templates"
+        self.piece_templates = {}
+
+        try:
+            moon_path = templates_dir / "moon.png"
+            sun_path = templates_dir / "sun.png"
+
+            if moon_path.exists():
+                self.piece_templates[0] = Image.open(moon_path).convert('RGBA')
+            if sun_path.exists():
+                self.piece_templates[1] = Image.open(sun_path).convert('RGBA')
+
+        except Exception as e:
+            print(f"Warning: Could not load piece templates: {e}")
+            self.piece_templates = {}
 
     def _setup_frames_dir(self):
         if os.path.exists(self.frames_dir):
@@ -71,26 +93,49 @@ class BoardVisualizer:
                 draw.rectangle([x1, y1, x2, y2], fill=color, outline=self.colors['grid'], width=2)
 
                 if cell_value is not None:
-                    text_x = x1 + self.cell_size // 2
-                    text_y = y1 + self.cell_size // 2
+                    # Use template images if available, otherwise fallback to text
+                    if cell_value in self.piece_templates:
+                        self._draw_piece_template(img, cell_value, x1, y1)
+                    else:
+                        # Fallback to text rendering
+                        text_x = x1 + self.cell_size // 2
+                        text_y = y1 + self.cell_size // 2
 
-                    try:
-                        font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 24)
-                    except:
-                        font = ImageFont.load_default()
+                        try:
+                            font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 24)
+                        except:
+                            font = ImageFont.load_default()
 
-                    text = str(cell_value)
-                    bbox = draw.textbbox((0, 0), text, font=font)
-                    text_width = bbox[2] - bbox[0]
-                    text_height = bbox[3] - bbox[1]
+                        text = str(cell_value)
+                        bbox = draw.textbbox((0, 0), text, font=font)
+                        text_width = bbox[2] - bbox[0]
+                        text_height = bbox[3] - bbox[1]
 
-                    draw.text((text_x - text_width//2, text_y - text_height//2),
-                             text, fill='white', font=font)
+                        draw.text((text_x - text_width//2, text_y - text_height//2),
+                                 text, fill='white', font=font)
 
         if constraints:
             self._draw_constraints(draw, constraints)
 
         return img
+
+    def _draw_piece_template(self, img, piece_type, x1, y1):
+        """Draw piece using template image."""
+        template = self.piece_templates[piece_type]
+
+        # Calculate size to fit in cell with some padding
+        padding = 8
+        target_size = self.cell_size - 2 * padding
+
+        # Resize template to fit in cell
+        template_resized = template.resize((target_size, target_size), Image.Resampling.LANCZOS)
+
+        # Calculate position to center the template in the cell
+        paste_x = x1 + padding
+        paste_y = y1 + padding
+
+        # Paste the template onto the board image
+        img.paste(template_resized, (paste_x, paste_y), template_resized)
 
     def _draw_constraints(self, draw, constraints):
         constraint_size = 8

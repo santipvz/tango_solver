@@ -11,9 +11,8 @@ Tango is a LinkedIn logic puzzle where you fill a 6x6 grid with moon (🌙) and 
 - **Balance rule**: Each row and column should have equal numbers of moons and suns
 
 ## ✨ Features
-
 - Automatic grid and piece detection from images
-- Constraint detection through visual pattern recognition
+- Constraint detection through visual pattern recognition with template matching
 - Backtracking algorithm with constraint propagation
 - Visual debugging and solution visualization
 - GIF animation: Step-by-step visualization of the backtracking algorithm (⚠️ significantly slower execution)
@@ -76,21 +75,35 @@ The GIF visualization shows:
 - Blue cells: piece type 0
 - Orange cells: piece type 1
 
-### Tests
+### Tests & Debugging
 
 ```bash
-python -m tests.test_runner           # Run all tests
-python -m tests.test_runner --visual  # With debug images (saves to tests/img/)
+python3 -m tests.test_runner           # Run all tests
+python3 -m tests.test_runner --visual  # With debug images (saves to tests/img/)
 
 # Test with specific image and generate visualizations:
-python -m tests.test_runner examples/sample5.png --visual
+python3 -m tests.test_runner examples/sample5.png --visual
 
 # Test with your own image:
-python -m tests.test_runner path/to/your/puzzle.png --visual
+python3 -m tests.test_runner path/to/your/puzzle.png --visual
 
 # Test with GIF generation:
-python -m tests.test_runner examples/sample1.png --gif
+python3 -m tests.test_runner examples/sample1.png --gif
 ```
+
+### Constraint Detection Debugging
+
+Debug constraint detection on all samples:
+```bash
+python3 tests/test_constraint_debug.py
+```
+
+Debug constraint detection on a specific image with visual output:
+```bash
+python tests/test_constraint_debug.py examples/sample6.png
+```
+
+This will show you exactly how the system detects and classifies each constraint, with visual comparisons between the detected regions and the templates used for matching.
 
 ### Example Puzzle
 
@@ -103,7 +116,7 @@ python -m tests.test_runner examples/sample1.png --gif
 The system generates comprehensive debugging visualizations when running tests with the `--visual` flag:
 
 ```bash
-python -m tests.test_runner examples/sample5.png --visual
+python3 -m tests.test_runner examples/sample5.png --visual
 ```
 
 This generates the following debug images in `tests/img/`:
@@ -143,7 +156,7 @@ The following shows the same board captured in two different ways:
 ```
 🎯 TANGO SOLVER
 ========================================
-🖼️  Parsing puzzle from: assets/right.png
+🖼️  Parsing puzzle from: examples/sample6.png
 ✅ Found 10 fixed pieces
 ✅ Found 4 constraints
 🔒 Fixed pieces:
@@ -158,19 +171,19 @@ The following shows the same board captured in two different ways:
    (5, 2): 0
    (5, 3): 1
 🔗 Constraints:
-   (1, 4) x (1, 5)
+   (1, 4) = (1, 5)
    (4, 0) x (4, 1)
-   (0, 1) = (1, 1)
-   (4, 4) = (5, 4)
+   (0, 1) x (1, 1)
+   (4, 4) x (5, 4)
 ✅ Puzzle solved!
-📊 Steps: 212
+📊 Steps: 96
 
 🎉 Final solved board:
 🌙 🟠 🟠 🌙 🟠 🌙
-🌙 🟠 🟠 🌙 🟠 🌙
+🌙 🌙 🟠 🌙 🟠 🟠
 🟠 🌙 🌙 🟠 🌙 🟠
-🟠 🌙 🌙 🟠 🟠 🌙
-🌙 🟠 🟠 🌙 🌙 🟠
+🟠 🟠 🌙 🟠 🌙 🌙
+🌙 🟠 🟠 🌙 🟠 🌙
 🟠 🌙 🌙 🟠 🌙 🟠
 ```
 
@@ -196,7 +209,7 @@ The following shows the same board captured in two different ways:
    (5, 2): 0
    (5, 3): 1
 🔗 Constraints:
-   (4, 4) = (5, 4)
+   (4, 4) x (5, 4)
 ❌ No solution found
 Final board state:
 ⬜ ⬜ 🟠 ⬜ ⬜ ⬜
@@ -227,45 +240,88 @@ classDiagram
 direction TB
     class TangoCLI {
         +main()
+        +parse_args()
+        +setup_logging()
     }
+
     class TangoImageParser {
         -grid_detector: GridDetector
         -piece_detector: PieceDetector
-        -constraint_classifier: ConstraintClassifier
+        -constraint_classifier: TemplateConstraintClassifier
         +parse_image(image_path: str) Dict
+        -_extract_board_contents(img, grid_coords) Dict
+        -_detect_edge_constraints(img, grid_coords) List
+        -_analyze_border_for_constraint(border_img, is_horizontal) str
     }
+
     class TangoSolver {
         -board: List~List~int~~
-        -constraints: List
-        -fixed_pieces: List
-        +add_constraint()
-        +add_fixed_piece()
+        -constraints: List~Dict~
+        -fixed_pieces: Dict
+        -visualizer: BoardVisualizer
+        +add_constraint(pos1, pos2, constraint_type)
+        +add_fixed_piece(row, col, piece_type)
         +solve(create_gif: bool) bool
         +print_board()
+        -_is_valid_placement(row, col, piece_type) bool
+        -_backtrack(create_gif) bool
+        -_check_row_col_balance() bool
     }
+
     class BoardVisualizer {
-        +create_board_image()
-        +save_frame()
-        +create_gif()
+        -board_size: int
+        -cell_size: int
+        -frames: List
+        +create_board_image(board, constraints, current_pos) Image
+        +save_frame(board, constraints, current_pos)
+        +create_gif(output_path, speed_ms)
+        +visualize_solution(board, constraints)
     }
+
     class GridDetector {
-        +detect_grid(img) List
+        +detect_grid(img: ndarray) List~List~Tuple~~
+        -_detect_grid_lines(img) Tuple
+        -_extract_cell_coords(lines) List
     }
+
     class PieceDetector {
-        +detect_piece(cell_img) Dict
+        +detect_piece(cell_img: ndarray) Dict
+        -_analyze_colors(img) Dict
+        -_classify_piece_type(colors) int
     }
+
+    class TemplateConstraintClassifier {
+        -templates_dir: Path
+        -templates: Dict
+        +classify_constraint(image: ndarray, is_horizontal: bool) str
+        +_load_templates() Dict
+        +_extract_constraint_from_template(template, name) ndarray
+        +_preprocess_image(image) ndarray
+        +_match_template(image, template) float
+        +_fallback_classify(image) str
+    }
+
     class ConstraintClassifier {
-        +classify_constraint(image) str
+        <<fallback>>
+        +classify_constraint(image: ndarray) str
+        -_count_horizontal_connections(mask) int
+        -_count_diagonal_connections(mask) int
     }
-    note for TangoImageParser "Processes Tango puzzle images<br/>Extracts pieces and constraints"
-    note for TangoSolver "Solves using backtracking<br/>Validates game rules<br/>Optional GIF generation"
-    note for BoardVisualizer "Creates visual representations<br/>Generates GIF animations"
+
+    %% Notes for key components
+    note for TangoImageParser "Main image processing pipeline<br/>Coordinates all detection components<br/>Handles both horizontal and vertical constraints"
+    note for TangoSolver "Constraint satisfaction solver<br/>Backtracking with pruning<br/>Optional step-by-step visualization"
+    note for TemplateConstraintClassifier "Advanced template-based matching<br/>High accuracy constraint detection<br/>Fallback to heuristic classifier"
+    note for BoardVisualizer "Visual output generation<br/>GIF animation support<br/>Debug visualizations"
+
+    %% Relationships
     TangoCLI --> TangoImageParser : uses
     TangoCLI --> TangoSolver : uses
-    TangoSolver --> BoardVisualizer : uses
+    TangoSolver --> BoardVisualizer : contains
     TangoImageParser --> GridDetector : contains
     TangoImageParser --> PieceDetector : contains
-    TangoImageParser --> ConstraintClassifier : contains
+    TangoImageParser --> TemplateConstraintClassifier : contains
+    TemplateConstraintClassifier --> ConstraintClassifier : fallback to
     TangoImageParser ..> TangoSolver : provides data
 ```
 ## 📋 Requirements

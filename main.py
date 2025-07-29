@@ -37,7 +37,8 @@ def solve_puzzle(image_path, create_gif=False, gif_speed=1, gif_output=None, ver
     if show_details and board_state['fixed_pieces']:
         print("🔒 Fixed pieces:")
         for piece in board_state['fixed_pieces']:
-            print(f"   ({piece['row']}, {piece['col']}): {piece['piece_type']}")
+            piece_emoji = "🌙" if piece['piece_type'] == 0 else "🟠"
+            print(f"   ({piece['row']}, {piece['col']}): {piece_emoji}")
 
     if show_details and board_state['constraints']:
         print("🔗 Constraints:")

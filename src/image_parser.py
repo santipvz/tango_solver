@@ -3,12 +3,12 @@ import cv2
 import numpy as np
 
 try:
-    from .constraint_classifier import ConstraintClassifier
+    from .template_constraint_classifier import TemplateConstraintClassifier
     from .grid_detector import GridDetector
     from .piece_detector import PieceDetector
 except ImportError:
     # Fallback for direct execution
-    from constraint_classifier import ConstraintClassifier
+    from template_constraint_classifier import TemplateConstraintClassifier
     from grid_detector import GridDetector
     from piece_detector import PieceDetector
 
@@ -27,7 +27,7 @@ class TangoImageParser:
         self.grid_size = 6
         self.grid_detector = GridDetector()
         self.piece_detector = PieceDetector()
-        self.constraint_classifier = ConstraintClassifier()
+        self.constraint_classifier = TemplateConstraintClassifier()
 
     def parse_image(self, image_path: str) -> Optional[Dict[str, Any]]:
         try:
@@ -92,7 +92,7 @@ class TangoImageParser:
 
                 if border_x >= 0 and border_x + border_w < width:
                     border_img = img[border_y:border_y+border_h, border_x:border_x+border_w]
-                    constraint_type = self._analyze_border_for_constraint(border_img)
+                    constraint_type = self._analyze_border_for_constraint(border_img, is_horizontal=True)
 
                     if constraint_type:
                         constraints.append({
@@ -112,7 +112,7 @@ class TangoImageParser:
 
                 if border_y >= 0 and border_y + border_h < height:
                     border_img = img[border_y:border_y+border_h, border_x:border_x+border_w]
-                    constraint_type = self._analyze_border_for_constraint(border_img)
+                    constraint_type = self._analyze_border_for_constraint(border_img, is_horizontal=False)
 
                     if constraint_type:
                         constraints.append({
@@ -123,7 +123,7 @@ class TangoImageParser:
 
         return constraints
 
-    def _analyze_border_for_constraint(self, border_img: np.ndarray) -> Optional[str]:
+    def _analyze_border_for_constraint(self, border_img: np.ndarray, is_horizontal: bool = True) -> Optional[str]:
         if border_img.size == 0:
             return None
 
@@ -140,7 +140,7 @@ class TangoImageParser:
         if np.sum(constraint_mask > 0) < 5:
             return None
 
-        classification = self.constraint_classifier.classify_constraint(constraint_mask)
+        classification = self.constraint_classifier.classify_constraint(constraint_mask, is_horizontal)
 
         if classification == 'equals':
             return '='

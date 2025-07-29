@@ -118,17 +118,7 @@ class TangoSolver:
         return True
 
     def solve(self, create_gif=False, gif_speed=400, gif_output="solving_animation.gif"):
-        """
-        Solve the Tango puzzle using backtracking
 
-        Args:
-            create_gif (bool): Whether to create GIF animation
-            gif_speed (int): Animation speed in milliseconds
-            gif_output (str): Output GIF filename
-
-        Returns:
-            bool: True if puzzle was solved, False otherwise
-        """
         if create_gif:
             self._enable_gif_creation(gif_speed)
 
@@ -140,7 +130,6 @@ class TangoSolver:
         return result
 
     def _enable_gif_creation(self, gif_speed=400):
-        """Enable GIF creation"""
         self._create_gif = True
         self._gif_speed = gif_speed
         self._visualizer = BoardVisualizer()

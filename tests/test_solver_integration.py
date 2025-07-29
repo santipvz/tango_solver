@@ -4,11 +4,90 @@ from pathlib import Path
 import cv2
 import numpy as np
 import time
+from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from image_parser import TangoImageParser
 from tango_solver import TangoSolver
+
+
+def load_piece_templates():
+    """Load moon and sun templates from templates directory."""
+    templates_dir = Path(__file__).parent.parent / "templates"
+    piece_templates = {}
+
+    try:
+        moon_path = templates_dir / "moon.png"
+        sun_path = templates_dir / "sun.png"
+
+        if moon_path.exists():
+            moon_pil = Image.open(moon_path).convert('RGBA')
+            moon_rgba = np.array(moon_pil)
+            moon_bgra = cv2.cvtColor(moon_rgba, cv2.COLOR_RGBA2BGRA)
+            piece_templates[0] = moon_bgra
+        if sun_path.exists():
+            sun_pil = Image.open(sun_path).convert('RGBA')
+            sun_rgba = np.array(sun_pil)
+            sun_bgra = cv2.cvtColor(sun_rgba, cv2.COLOR_RGBA2BGRA)
+            piece_templates[1] = sun_bgra
+
+    except Exception as e:
+        print(f"Warning: Could not load piece templates: {e}")
+        piece_templates = {}
+
+    return piece_templates
+
+
+def draw_piece_with_template(vis_img, center_x, center_y, piece_type, templates, size=60):
+    """Draw a piece using template image or fallback to circle."""
+    if piece_type in templates:
+        template = templates[piece_type]
+        if template.shape[2] == 4:
+            template_resized = cv2.resize(template, (size, size), interpolation=cv2.INTER_AREA)
+            rgb = template_resized[:, :, :3]
+            alpha = template_resized[:, :, 3] / 255.0  # Normalizar alfa a [0,1]
+            x_start = center_x - size // 2
+            y_start = center_y - size // 2
+            x_end = x_start + size
+            y_end = y_start + size
+            if (x_start >= 0 and y_start >= 0 and x_end <= vis_img.shape[1] and y_end <= vis_img.shape[0]):
+                roi = vis_img[y_start:y_end, x_start:x_end].copy()
+                # Fondo blanco
+                for c in range(3):
+                    roi[:, :, c] = (rgb[:, :, c] * alpha + 255 * (1 - alpha)).astype(np.uint8)
+                vis_img[y_start:y_end, x_start:x_end] = roi
+            else:
+                draw_piece_fallback(vis_img, center_x, center_y, piece_type, size)
+        else:
+            template_resized = cv2.resize(template, (size, size), interpolation=cv2.INTER_AREA)
+            x_start = center_x - size // 2
+            y_start = center_y - size // 2
+            x_end = x_start + size
+            y_end = y_start + size
+            if (x_start >= 0 and y_start >= 0 and x_end <= vis_img.shape[1] and y_end <= vis_img.shape[0]):
+                vis_img[y_start:y_end, x_start:x_end] = template_resized[:, :, :3]
+            else:
+                draw_piece_fallback(vis_img, center_x, center_y, piece_type, size)
+    else:
+        draw_piece_fallback(vis_img, center_x, center_y, piece_type, size)
+
+
+def draw_piece_fallback(vis_img, center_x, center_y, piece_type, size=60):
+    """Fallback method to draw pieces as circles with text."""
+    radius = size // 2
+    font_scale = size / 60.0  # Scale font with size
+
+    if piece_type == 0:  # Moon
+        cv2.circle(vis_img, (center_x, center_y), radius, (255, 165, 0), -1)
+        cv2.circle(vis_img, (center_x, center_y), radius, (0, 0, 0), max(2, int(size/20)))
+        cv2.putText(vis_img, "M", (center_x - int(14*font_scale), center_y + int(12*font_scale)),
+                   cv2.FONT_HERSHEY_DUPLEX, font_scale*1.2, (0, 0, 0), max(2, int(size/20)))
+    else:  # Sun
+        cv2.circle(vis_img, (center_x, center_y), radius, (0, 255, 255), -1)
+        cv2.circle(vis_img, (center_x, center_y), radius, (0, 0, 0), max(2, int(size/20)))
+        cv2.putText(vis_img, "S", (center_x - int(12*font_scale), center_y + int(12*font_scale)),
+                   cv2.FONT_HERSHEY_DUPLEX, font_scale*1.2, (0, 0, 0), max(2, int(size/20)))
 
 
 def draw_grid_detection_visualization(image_path, output_path=None):
@@ -25,6 +104,9 @@ def draw_grid_detection_visualization(image_path, output_path=None):
         if img is None:
             print(f"❌ Could not load image: {image_path}")
             return False
+
+        # Load piece templates
+        piece_templates = load_piece_templates()
 
         img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         board_state = parser.parse_image(image_path)
@@ -113,16 +195,8 @@ def draw_grid_detection_visualization(image_path, output_path=None):
             center_x = x + cell_size // 2
             center_y = y + cell_size // 2
 
-            if piece_type == 0:  # Moon
-                cv2.circle(vis_img, (center_x, center_y), 30, (255, 165, 0), -1)
-                cv2.circle(vis_img, (center_x, center_y), 30, (0, 0, 0), 3)
-                cv2.putText(vis_img, "M", (center_x - 14, center_y + 12),
-                           cv2.FONT_HERSHEY_DUPLEX, 1.2, (0, 0, 0), 3)
-            else:  # Sun
-                cv2.circle(vis_img, (center_x, center_y), 30, (0, 255, 255), -1)
-                cv2.circle(vis_img, (center_x, center_y), 30, (0, 0, 0), 3)
-                cv2.putText(vis_img, "S", (center_x - 12, center_y + 12),
-                           cv2.FONT_HERSHEY_DUPLEX, 1.2, (0, 0, 0), 3)
+            # Use template-based drawing
+            draw_piece_with_template(vis_img, center_x, center_y, piece_type, piece_templates)
 
         # Draw constraint connections
         for constraint in constraints:
@@ -299,6 +373,9 @@ def test_visual_solver_progress(image_path, output_path=None):
         parser = TangoImageParser()
         board_state = parser.parse_image(image_path)
 
+        # Load piece templates
+        piece_templates = load_piece_templates()
+
         if not board_state:
             print("❌ Could not parse image")
             return False
@@ -344,15 +421,9 @@ def test_visual_solver_progress(image_path, output_path=None):
                 piece_value = solver.board[row][col]
 
                 if piece_value == 0:  # Moon
-                    cv2.circle(vis_img, (center_x, center_y), 30, (255, 165, 0), -1)
-                    cv2.circle(vis_img, (center_x, center_y), 30, (0, 0, 0), 3)
-                    cv2.putText(vis_img, "M", (center_x - 14, center_y + 12),
-                               cv2.FONT_HERSHEY_DUPLEX, 1.2, (0, 0, 0), 3)
+                    draw_piece_with_template(vis_img, center_x, center_y, 0, piece_templates)
                 elif piece_value == 1:  # Sun
-                    cv2.circle(vis_img, (center_x, center_y), 30, (0, 255, 255), -1)
-                    cv2.circle(vis_img, (center_x, center_y), 30, (0, 0, 0), 3)
-                    cv2.putText(vis_img, "S", (center_x - 12, center_y + 12),
-                               cv2.FONT_HERSHEY_DUPLEX, 1.2, (0, 0, 0), 3)
+                    draw_piece_with_template(vis_img, center_x, center_y, 1, piece_templates)
 
         # Draw constraints as lines between cells with clean style
         for constraint in board_state['constraints']:
@@ -483,6 +554,9 @@ def create_comprehensive_visualization(image_path, output_path=None):
             print(f"❌ Could not load image: {image_path}")
             return False
 
+        # Load piece templates
+        piece_templates = load_piece_templates()
+
         board_state = parser.parse_image(image_path)
         if not board_state:
             print("❌ Could not parse image")
@@ -571,21 +645,11 @@ def create_comprehensive_visualization(image_path, output_path=None):
             center_y = y + cell_size // 2
 
             if piece_type == 0:  # Moon
-                # Draw moon symbol
-                cv2.circle(vis_img, (center_x, center_y), 35, (255, 165, 0), -1)
-                cv2.circle(vis_img, (center_x, center_y), 35, (0, 0, 0), 4)
-
-                # Add "M" text
-                cv2.putText(vis_img, "M", (center_x - 17, center_y + 14),
-                           cv2.FONT_HERSHEY_DUPLEX, 1.5, (0, 0, 0), 4)
+                # Use template-based drawing with larger size
+                draw_piece_with_template(vis_img, center_x, center_y, 0, piece_templates, size=70)
             else:  # Sun
-                # Draw sun symbol
-                cv2.circle(vis_img, (center_x, center_y), 35, (0, 255, 255), -1)
-                cv2.circle(vis_img, (center_x, center_y), 35, (0, 0, 0), 4)
-
-                # Add "S" text
-                cv2.putText(vis_img, "S", (center_x - 15, center_y + 15),
-                           cv2.FONT_HERSHEY_DUPLEX, 1.5, (0, 0, 0), 4)
+                # Use template-based drawing with larger size
+                draw_piece_with_template(vis_img, center_x, center_y, 1, piece_templates, size=70)
 
         # Draw constraint connections
         for constraint in constraints:
