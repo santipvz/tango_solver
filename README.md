@@ -43,7 +43,7 @@ python3 main.py path/to/your/puzzle.png
 ### Options
 
 ```bash
-python3 main.py examples/sample1.png --verbose    # Detailed output
+python3 main.py examples/sample1.png --verbose   # Detailed output
 python3 main.py examples/sample1.png --gif       # Generate GIF animation (⚠️ much slower)
 python3 main.py examples/sample1.png --quiet     # Minimal output
 ```
@@ -95,12 +95,12 @@ python3 -m tests.test_runner examples/sample1.png --gif
 
 Debug constraint detection on all samples:
 ```bash
-python3 tests/test_constraint_debug.py
+python3 -m tests.test_constraint_debug
 ```
 
 Debug constraint detection on a specific image with visual output:
 ```bash
-python tests/test_constraint_debug.py examples/sample6.png
+python3 -m tests.test_constraint_debug.py examples/sample6.png
 ```
 
 This will show you exactly how the system detects and classifies each constraint, with visual comparisons between the detected regions and the templates used for matching.
