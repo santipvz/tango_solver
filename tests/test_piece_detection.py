@@ -1,5 +1,4 @@
 import sys
-import os
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
@@ -11,7 +10,7 @@ def test_piece_detection_structure(image_path):
     """
     Test: Verify that piece detection returns valid structure.
     """
-    print(f"🧪 Test: Piece detection structure")
+    print("🧪 Test: Piece detection structure")
     print("-" * 50)
 
     try:

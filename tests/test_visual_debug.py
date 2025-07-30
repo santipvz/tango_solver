@@ -1,19 +1,16 @@
 import sys
-import os
 from pathlib import Path
 import cv2
 import numpy as np
-import time
 from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+from image_parser import TangoImageParser
+from tango_solver import TangoSolver
 
 img_dir = Path(__file__).parent / "img"
 if not img_dir.exists():
     img_dir.mkdir(parents=True, exist_ok=True)
-
-from image_parser import TangoImageParser
-from tango_solver import TangoSolver
 
 
 def load_piece_templates():
@@ -98,7 +95,7 @@ def draw_grid_detection_visualization(image_path, output_path=None):
     """
     Test: Create visual representation of detected grid and constraints.
     """
-    print(f"🧪 Test: Visual grid detection and constraint mapping")
+    print("🧪 Test: Visual grid detection and constraint mapping")
     print("-" * 60)
 
     try:
@@ -112,7 +109,6 @@ def draw_grid_detection_visualization(image_path, output_path=None):
         # Load piece templates
         piece_templates = load_piece_templates()
 
-        img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         board_state = parser.parse_image(image_path)
 
         if not board_state:
@@ -120,11 +116,10 @@ def draw_grid_detection_visualization(image_path, output_path=None):
             return False
 
         # Get grid coordinates
-        grid_coords = board_state['grid_coords']
         fixed_pieces = board_state['fixed_pieces']
         constraints = board_state['constraints']
 
-        print(f"✅ Grid detected: 6x6")
+        print("✅ Grid detected: 6x6")
         print(f"✅ Fixed pieces: {len(fixed_pieces)}")
         print(f"✅ Constraints: {len(constraints)}")
 
@@ -262,7 +257,7 @@ def draw_constraint_heatmap(image_path, output_path=None):
     """
     Test: Create constraint density heatmap.
     """
-    print(f"\n🧪 Test: Constraint density heatmap")
+    print("\n🧪 Test: Constraint density heatmap")
     print("-" * 50)
 
     try:
@@ -273,7 +268,6 @@ def draw_constraint_heatmap(image_path, output_path=None):
             print("❌ Could not parse image")
             return False
 
-        grid_coords = board_state['grid_coords']
         constraints = board_state['constraints']
 
         # Create heatmap matrix
@@ -353,7 +347,7 @@ def draw_constraint_heatmap(image_path, output_path=None):
         max_density = heatmap.max()
         cells_with_constraints = np.count_nonzero(heatmap)
 
-        print(f"📊 Constraint statistics:")
+        print("📊 Constraint statistics:")
         print(f"   • Total constraints: {total_constraints}")
         print(f"   • Cells with constraints: {cells_with_constraints}/36")
         print(f"   • Max constraint density: {max_density:.1f}")
@@ -369,7 +363,7 @@ def test_visual_solver_progress(image_path, output_path=None):
     """
     Test: Visualize solver progress step by step.
     """
-    print(f"\n🧪 Test: Solver progress visualization")
+    print("\n🧪 Test: Solver progress visualization")
     print("-" * 50)
 
     try:
@@ -385,9 +379,9 @@ def test_visual_solver_progress(image_path, output_path=None):
             return False
 
         solver = TangoSolver()
-        grid_coords = board_state['grid_coords']
+        fixed_pieces = board_state['fixed_pieces']
 
-        for piece in board_state['fixed_pieces']:
+        for piece in fixed_pieces:
             solver.add_fixed_piece(piece['row'], piece['col'], piece['piece_type'])
 
         for constraint in board_state['constraints']:
@@ -475,7 +469,7 @@ def test_visual_solver_progress(image_path, output_path=None):
         moons = sum(1 for row in range(6) for col in range(6) if solver.board[row][col] == 0)
         suns = sum(1 for row in range(6) for col in range(6) if solver.board[row][col] == 1)
 
-        print(f"📊 Solution summary:")
+        print("📊 Solution summary:")
         print(f"   • Status: {'✅ Solved' if solved else '❌ Unsolved'}")
         print(f"   • Moon pieces: {moons}")
         print(f"   • Sun pieces: {suns}")
@@ -492,7 +486,7 @@ def create_comprehensive_visualization(image_path, output_path=None):
     """
     Test: Create a comprehensive, highly readable visualization.
     """
-    print(f"\n🧪 Test: Comprehensive visualization with enhanced readability")
+    print("\n🧪 Test: Comprehensive visualization with enhanced readability")
     print("-" * 70)
 
     try:
@@ -511,7 +505,6 @@ def create_comprehensive_visualization(image_path, output_path=None):
             print("❌ Could not parse image")
             return False
 
-        grid_coords = board_state['grid_coords']
         fixed_pieces = board_state['fixed_pieces']
         constraints = board_state['constraints']
 
@@ -639,7 +632,7 @@ def create_comprehensive_visualization(image_path, output_path=None):
 
         # Calculate content first to determine proper height
         content_height = 425
-        legend_height = content_height  # Dynamic height based on content
+        # legend_height = content_height  # Dynamic height based on content
 
         # Expand image to include larger legend
         expanded_img = np.ones((vis_size, vis_size + legend_width + 50, 3), dtype=np.uint8) * 240
@@ -666,16 +659,15 @@ def create_comprehensive_visualization(image_path, output_path=None):
 
         y_offset += 40
 
-        # Pieces info - texto y templates
         cv2.putText(expanded_img, "Fixed Pieces:", (legend_x, y_offset),
                    cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 0), 2)
         y_offset += 15
-        # Luna
+
         draw_piece_with_template(expanded_img, legend_x + 20, y_offset + 15, 0, piece_templates, size=36)
         cv2.putText(expanded_img, "Moon pieces (type 0)", (legend_x + 50, y_offset + 22),
                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 0), 2)
         y_offset += 50
-        # Sol
+
         draw_piece_with_template(expanded_img, legend_x + 20, y_offset + 15, 1, piece_templates, size=36)
         cv2.putText(expanded_img, "Sun pieces (type 1)", (legend_x + 50, y_offset + 22),
                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 0), 2)

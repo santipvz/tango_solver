@@ -3,7 +3,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from pathlib import Path
 import sys
-import os
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
@@ -130,7 +129,7 @@ def debug_constraint_detection(image_path: str, save_debug: bool = True):
 
         plt.tight_layout()
 
-        debug_path = f"constraint_debug.png"
+        debug_path = "constraint_debug.png"
         plt.savefig(debug_path, dpi=150, bbox_inches='tight')
         print(f"💾 Debug visualization saved to: {debug_path}")
 

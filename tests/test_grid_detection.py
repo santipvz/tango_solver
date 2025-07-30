@@ -1,5 +1,4 @@
 import sys
-import os
 from pathlib import Path
 import cv2
 
@@ -12,7 +11,7 @@ def test_grid_detection(image_path):
     """
     Test: Verify that 6x6 grid detection works correctly.
     """
-    print(f"🧪 Test: 6x6 Grid detection")
+    print("🧪 Test: 6x6 Grid detection")
     print("-" * 50)
 
     try:

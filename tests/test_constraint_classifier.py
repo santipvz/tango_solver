@@ -1,5 +1,4 @@
 import sys
-import os
 from pathlib import Path
 import numpy as np
 
@@ -12,7 +11,7 @@ def test_constraint_classifier_robustness():
     """
     Test: Verify constraint classifier robustness.
     """
-    print(f"🧪 Test: Constraint classifier robustness")
+    print("🧪 Test: Constraint classifier robustness")
     print("-" * 50)
 
     try:

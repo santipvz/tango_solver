@@ -61,7 +61,7 @@ class BoardVisualizer:
         if step_info:
             try:
                 title_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 14)
-            except:
+            except Exception:
                 title_font = ImageFont.load_default()
 
             bbox = draw.textbbox((0, 0), step_info, font=title_font)
@@ -103,7 +103,7 @@ class BoardVisualizer:
 
                         try:
                             font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 24)
-                        except:
+                        except Exception:
                             font = ImageFont.load_default()
 
                         text = str(cell_value)

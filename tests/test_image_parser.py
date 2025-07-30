@@ -51,7 +51,7 @@ def test_edge_cases_and_robustness(image_path):
     """
     Test: Edge cases and general system robustness.
     """
-    print(f"\n🧪 Test: Edge cases and robustness")
+    print("\n🧪 Test: Edge cases and robustness")
     print("-" * 50)
 
     try:
